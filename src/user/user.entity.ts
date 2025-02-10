@@ -50,9 +50,6 @@ export class UserEntity {
   @Column({ nullable: true, type: 'text' })
   phone: string;
 
-  @Column({ nullable: true, unique: true })
-  token: string;
-
   // Хешування пароля
   static async hashPassword(password: string): Promise<string> {
     return await argon2.hash(password);

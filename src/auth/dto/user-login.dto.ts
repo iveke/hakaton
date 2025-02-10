@@ -16,4 +16,7 @@ export class UserLoginDto {
   @IsEmail()
   email: string;
 
+  @IsString()
+  token: string;
+
 }

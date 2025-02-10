@@ -1,6 +1,3 @@
-// import { UserRepository } from 'src/user/user.repository';
-// import { UserSignUpDto } from './dto/create-user.dto';
-import { LoginInfoDto } from './dto/login-info.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { JwtPayload } from './interface/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
@@ -34,7 +31,7 @@ export class AuthService {
     //   fileUrl = await this.uploadService.uploadFile(file, user.id);
     // }
 
-    const accessToken = await this.createJwt(user);
+    const accessToken = await this.createJwt(user, userSignUpDto.token);
 
     return {
       accessToken,
@@ -59,20 +56,20 @@ export class AuthService {
     //   }
     // }
 
-    const accessToken = await this.createJwt(user);
+    const accessToken = await this.createJwt(user, userLoginDto.token);
 
     // const loginInfo: LoginInfoDto = { accessToken };
     return { accessToken, user };
   }
 
-  async updateLogin(user: UserEntity): Promise<LoginInfoDto> {
-    const accessToken = await this.createJwt(user);
+  // async updateLogin(user: UserEntity): Promise<LoginInfoDto> {
+  //   const accessToken = await this.createJwt(user);
 
-    return { accessToken };
-  }
+  //   return { accessToken };
+  // }
 
-  async createJwt(user: UserEntity): Promise<string> {
-    const { id, email, role, token, clerkId } = user;
+  async createJwt(user: UserEntity, token: string): Promise<string> {
+    const { id, email, role, clerkId } = user;
 
     const payload: JwtPayload = {
       id,
