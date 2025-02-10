@@ -5,13 +5,14 @@ import {
 } from '@nestjs/common';
 // import * as argon2 from 'argon2';
 import { AUTH_ERROR } from '../auth/enum/auth-error.enum';
-import { UserSignUpDto } from 'src/auth/dto/create-user.dto';
+// import { UserSignUpDto } from 'src/auth/dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // import { format } from 'date-fns';
 import { UpdateUserDto } from './dto/update-user.dto';
 // import { UploadService } from './upload-file.service';
-import * as argon2 from 'argon2';
+// import * as argon2 from 'argon2';
+import { CreateUserDto } from './dto/create-user.dto';
 
 export class UserRepository {
   constructor(
@@ -20,8 +21,9 @@ export class UserRepository {
     // private readonly uploadService: UploadService,
   ) {}
 
-  async createUser(createUserDto: UserSignUpDto): Promise<UserEntity> {
-    const { password, email } = createUserDto;
+  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+    const { email, firstName, lastName, imageURL, clerkId } =
+      createUserDto;
 
     const isUserExist = await this.repository.findOne({
       where: { email: email },
@@ -33,31 +35,22 @@ export class UserRepository {
 
     const user: UserEntity = new UserEntity();
 
-    user.password = await argon2.hash(password);
+    // user.password = await argon2.hash(password);
 
     user.email = email.toLowerCase();
 
-    // if (phone) {
-    //   user.phone = phone;
-    // }
-
-    // if (birthDay) {
-    //   console.log(birthDay);
-    //   // Парсимо дату у форматі день/місяць/рік
-    //   const [day, month, year] = birthDay.split('/').map(Number);
-    //   const date = new Date(year, month - 1, day);
-    //   console.log(date);
-    //   // const birthDayDate = parse(birthDay, 'dd/MM/yyyy');
-    //   const birthDayDate = format(date, 'dd/MM/yyyy');
-    //   console.log(birthDayDate);
-
-    //   user.birthDay = date;
-    // }
-
-    // if (name) {
-    //   user.name = name;
-    // }
-
+    if (firstName) {
+      user.firstName = firstName;
+    }
+    if (clerkId) {
+      user.clerkId = clerkId;
+    }
+    if(lastName){
+      user.lastName = lastName;
+    }
+    if(imageURL){
+      user.imageURL = imageURL;
+    }
     try {
       return await this.repository.save(user);
     } catch (error) {
@@ -81,37 +74,7 @@ export class UserRepository {
 
     const { phone, name } = updateUserDto;
 
-    // if (email) {
-    //   user.email = email.toLowerCase();
-    // }
-
-    // if (password) {
-    //   user.updatePassword(password);
-    // }
-    // let fileUrl = null;
-    // if (file) {
-    //   const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    //   if (!allowedMimeTypes.includes(file.mimetype)) {
-    //     throw new BadRequestException('Недопустимий формат файлу');
-    //   }
-    //   fileUrl = await this.uploadService.uploadFile(file, user.id);
-    //   user.photo = fileUrl;
-    // }
-
-    if (name) {
-      user.name = name;
-    }
-
-    if (phone) {
-      user.phone = phone;
-    }
-
-    // if (birthDay) {
-    //   const [day, month, year] = birthDay.split('/').map(Number);
-    //   const date = new Date(year, month - 1, day);
-
-    //   user.birthDay = date;
-    // }
+console.log(phone, name)
 
     await this.repository.save(user);
 

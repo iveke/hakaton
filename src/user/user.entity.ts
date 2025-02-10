@@ -1,21 +1,34 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { USER_ROLE } from './enum/user-role.enum';
 import * as argon2 from 'argon2';
+import { QuestProgress } from 'src/quest/quest-progress.entity';
+import { ReviewEntity } from 'src/review/review.entity';
 
 @Entity('user')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @OneToMany(() => QuestProgress, (userQuest) => userQuest.user)
+  quests: QuestProgress[];
+
+  @OneToMany(() => ReviewEntity, (review) => review.user, { cascade: true })
+  reviews: ReviewEntity[];
+
+  @Column({ nullable: false, unique: true })
+  clerkId: string;
+
   @Column({ nullable: false, unique: true })
   email: string;
 
-  
   @Column()
   password: string;
 
   @Column({ type: 'text', nullable: true })
-  name: string;
+  firstName: string;
+
+  @Column({ type: 'text', nullable: true })
+  lastName: string;
 
   @Column({ type: 'int', nullable: true })
   age: number;
@@ -32,10 +45,13 @@ export class UserEntity {
   countQuest: number;
 
   @Column({ nullable: true })
-  photo: string;
+  imageURL: string;
 
   @Column({ nullable: true, type: 'text' })
   phone: string;
+
+  @Column({ nullable: true, unique: true })
+  token: string;
 
   // Хешування пароля
   static async hashPassword(password: string): Promise<string> {
