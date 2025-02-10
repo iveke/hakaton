@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ReviewModule } from './review/review.module';
+import { QuestModule } from './quest/quest.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -17,6 +20,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         synchronize: true,
       }),
     }),
+    ReviewModule,
+    QuestModule,
+    TaskModule,
     AuthModule,
     UserModule,
   ],

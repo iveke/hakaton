@@ -21,9 +21,6 @@ export class UserEntity {
   @Column({ nullable: false, unique: true })
   email: string;
 
-  @Column()
-  password: string;
-
   @Column({ type: 'text', nullable: true })
   firstName: string;
 
@@ -56,12 +53,12 @@ export class UserEntity {
   }
 
   // Валідація пароля
-  async validatePassword(password: string): Promise<boolean> {
-    return await argon2.verify(this.password, password);
-  }
+  // async validatePassword(password: string): Promise<boolean> {
+  //   return await argon2.verify(this.password, password);
+  // }
 
-  // Оновлення пароля
-  async updatePassword(password: string): Promise<void> {
-    this.password = await UserEntity.hashPassword(password);
-  }
+  // // Оновлення пароля
+  // async updatePassword(password: string): Promise<void> {
+  //   this.password = await UserEntity.hashPassword(password);
+  // }
 }
