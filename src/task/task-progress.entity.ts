@@ -11,7 +11,7 @@ export class TaskProgress {
   @ManyToOne(()=>QuestProgress, (userQuest) => userQuest.userTaskList)
   userQuest: QuestProgress;
 
-  @ManyToOne(()=>TaskEntity, (task)=> task.taskList)
+  @ManyToOne(()=>TaskEntity, (task)=> task.userTaskList)
   task: TaskEntity;
 
   @Column({ nullable: false, default: false, type: "bool" })

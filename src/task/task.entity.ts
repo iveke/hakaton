@@ -12,7 +12,7 @@ export class TaskEntity {
   quest: QuestEntity;
 
   @OneToMany(() => TaskProgress, (taskProgress) => taskProgress.task)
-  taskList: TaskProgress[];
+  userTaskList: TaskProgress[];
 
   @Column({ type: 'text', nullable: false })
   condition: string;
