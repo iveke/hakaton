@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UseGuards,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -37,18 +38,18 @@ export class TaskController {
     return this.taskService.create(createTaskDto, file, user);
   }
 
-  @UseGuards(AuthGuard('jwt'), AccountGuard)
-  @Post('/join/:userQuestId')
-  async createTaskProgress(
-    @GetAccount() user: UserEntity,
-    @Param('userQuestId') userQuestId: number,
-  ) {
-    return this.taskService.createTaskProgress(userQuestId, user);
-  }
-
   @Get('/list/:questId')
   async findByQuest(@Param('questId') questId: number) {
     return this.taskService.getList(questId);
+  }
+
+  @Get('/user-list/:questId')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async getUserTaskListByQuest(
+    @Param('questId') questId: number,
+    @GetAccount() user: UserEntity,
+  ) {
+    return this.taskService.getUserTaskList(questId, user);
   }
 
   @Get('/getInfo/:id')
@@ -56,6 +57,15 @@ export class TaskController {
     return this.taskService.getOne(id);
   }
 
+  @Get('/getUserTaskInfo/:questId')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async getUserTask(
+    @Param('questId') questId: number,
+    @Query('taskId') taskId: number,
+    @GetAccount() user: UserEntity,
+  ) {
+    return this.taskService.getUserTask(questId, user, taskId);
+  }
   // @Get('/check/:id')
   // async checkAnswer(@Param('id') id: number) {
   //   return this.taskService.checkAnswer(id);

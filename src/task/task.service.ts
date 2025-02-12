@@ -110,50 +110,35 @@ export class TaskService {
     return this.taskRepository.save(task);
   }
 
-  async createTaskProgress(questId: number, user: UserEntity) {
-    const userQuest = await this.questProgressRepository.findOne({
-      where: {
-        quest: {
-          id: questId,
-        },
-        user: {
-          id: user.id,
-        },
-      },
-      relations: ['userTaskList', 'quest', 'quest.taskList'],
-    });
-
-    if (!userQuest) {
-      throw new Error('User quest progress not found');
-    }
-
-    const quest = await this.questRepository.findOne({
-      where: { id: questId },
-      relations: ['taskList'],
-    });
-
-    if (!quest) {
-      throw new Error('Quest not found');
-    }
-
-    const taskProgressList = quest.taskList.map((task) =>
-      this.taskProgressRepository.create({
-        userQuest,
-        task,
-        status: false,
-      }),
-    );
-
-    await this.taskProgressRepository.save(taskProgressList);
-
-    return taskProgressList;
-  }
-
   async getList(questId: number) {
     return await this.taskRepository.find({
       where: { quest: { id: questId } },
       relations: ['quest'],
     });
+  }
+
+  async getUserTaskList(questId: number, user: UserEntity) {
+    return await this.taskProgressRepository.find({
+      where: { userQuest: { quest: { id: questId }, user: { id: user.id } } },
+      relations: ['task'],
+    });
+  }
+
+  async getUserTask(questId: number, user: UserEntity, taskId: number) {
+
+    const userTask = await this.taskProgressRepository.findOne({
+      where: {
+        userQuest: { quest: { id: questId }, user: { id: user.id } },
+        task: { id: taskId },
+      },
+      relations: ['task'],
+    });
+
+    if (!userTask) {
+      throw new NotFoundException('not found this userTask');
+    }
+
+    return userTask;
   }
 
   async getOne(id: number) {

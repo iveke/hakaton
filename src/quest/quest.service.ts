@@ -136,6 +136,16 @@ export class QuestService {
     return 'Все видалено успішно';
   }
 
+  async checkUserJoined(questId: number, user: UserEntity) {
+    const userQuest = await this.questProgressRepository.findOne({
+      where: { user: { id: user.id }, quest: { id: questId } },
+    });
+    if (userQuest) {
+      return true;
+    }
+    return false;
+  }
+
   async findAll(
     category?: CATEGORY_ENUM,
     level?: QUEST_LEVEL_ENUM,

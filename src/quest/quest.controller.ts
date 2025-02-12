@@ -69,6 +69,15 @@ export class QuestController {
     return this.questService.findOne(+id);
   }
 
+  @Get('/checkUserJoined/:questId')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async checkUserJoined(
+    @GetAccount() user: UserEntity,
+    @Param('questId') questId: number,
+  ) {
+    return await this.questService.checkUserJoined(questId, user);
+  }
+
   @Patch('/update/:id')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
   @UseInterceptors(FileInterceptor('file'))
