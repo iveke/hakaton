@@ -55,7 +55,16 @@ export class QuestController {
     return this.questService.getUserCreatedQuest(user.id, category, level);
   }
 
-  @Get('/getInfo:id')
+  @Post('/join/:questId')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async createTaskProgress(
+    @GetAccount() user: UserEntity,
+    @Param('questId') questId: number,
+  ) {
+    return this.questService.joinToQuest(questId, user);
+  }
+
+  @Get('/getInfo/:id')
   findOne(@Param('id') id: string) {
     return this.questService.findOne(+id);
   }
@@ -70,6 +79,15 @@ export class QuestController {
     @GetAccount() user: UserEntity,
   ) {
     return this.questService.update(+id, updateQuestDto, user, file);
+  }
+
+  @Delete('/leave/:questId')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async leaveFromQuest(
+    @GetAccount() user: UserEntity,
+    @Param('questId') questId: number,
+  ) {
+    return this.questService.leaveFromQuest(questId, user);
   }
 
   @Delete('/remove/:id')

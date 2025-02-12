@@ -5,11 +5,13 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { QuestEntity } from './quest.entity';
 import { TaskProgress } from 'src/task/task-progress.entity';
 
 @Entity('quest_progress')
+@Unique(['user', 'quest'])
 export class QuestProgress {
   @PrimaryGeneratedColumn()
   id: number;

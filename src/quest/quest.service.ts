@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -13,12 +14,18 @@ import { USER_ROLE } from 'src/user/enum/user-role.enum';
 import { UploadService } from 'src/file/upload-file.service';
 import { QUEST_LEVEL_ENUM } from './enum/quest-level.enum';
 import { CATEGORY_ENUM } from './enum/quest-category.enum';
+import { QuestProgress } from './quest-progress.entity';
+import { TaskProgress } from 'src/task/task-progress.entity';
 
 @Injectable()
 export class QuestService {
   constructor(
     @InjectRepository(QuestEntity)
     private readonly questRepository: Repository<QuestEntity>,
+    @InjectRepository(QuestProgress)
+    private readonly questProgressRepository: Repository<QuestProgress>,
+    @InjectRepository(TaskProgress)
+    private readonly taskProgressRepository: Repository<TaskProgress>,
     private readonly uploadService: UploadService,
   ) {}
 
@@ -38,50 +45,6 @@ export class QuestService {
     });
 
     return this.questRepository.save(quest);
-  }
-
-  async findAll(
-    category?: CATEGORY_ENUM,
-    level?: QUEST_LEVEL_ENUM,
-  ): Promise<QuestEntity[]> {
-    const where: any = {};
-
-    if (category) {
-      where.category = category;
-    }
-
-    if (level) {
-      where.level = level;
-    }
-    return this.questRepository.find({
-      relations: ['taskList', 'reviews'],
-      where: where,
-    });
-  }
-
-  async getUserCreatedQuest(
-    userId: string,
-    category?: CATEGORY_ENUM,
-    level?: QUEST_LEVEL_ENUM,
-  ): Promise<QuestEntity[]> {
-    const where: any = { ownerId: userId }; 
-
-    if (category) {
-      where.category = category;
-    }
-
-    if (level) {
-      where.level = level;
-    }
-    return await this.questRepository.find({ where: where });
-  }
-
-  async findOne(id: number): Promise<QuestEntity> {
-    const quest = await this.questRepository.findOne({ where: { id } });
-    if (!quest) {
-      throw new NotFoundException(`Quest with id ${id} not found`);
-    }
-    return quest;
   }
 
   async update(
@@ -118,6 +81,104 @@ export class QuestService {
       posterImage: fileUrl ?? undefined,
     });
     return this.findOne(id);
+  }
+
+  async joinToQuest(questId: number, user: UserEntity) {
+    const quest = await this.questRepository.findOne({
+      where: { id: questId },
+      relations: ['users', 'taskList'],
+    });
+
+    const existingQuestProgress = await this.questProgressRepository.findOne({
+      where: { quest: { id: questId }, user: { id: user.id } },
+    });
+
+    if (existingQuestProgress) {
+      throw new ConflictException('Ви вже приєдналися до цього квесту');
+    }
+
+    const userQuest = await this.questProgressRepository.save(
+      await this.questProgressRepository.create({
+        quest,
+        user,
+        countCompletedTask: 0,
+      }),
+    );
+
+    quest.users.push(userQuest);
+    console.log(quest.taskList);
+
+    const taskProgressList = quest.taskList.map((task) =>
+      this.taskProgressRepository.create({
+        userQuest,
+        task,
+        status: false,
+      }),
+    );
+
+    await this.taskProgressRepository.save(taskProgressList);
+
+    quest.userCount += 1;
+    await this.questRepository.save(quest);
+    return userQuest;
+  }
+
+  async leaveFromQuest(questId: number, user: UserEntity) {
+    const questProgress = await this.questProgressRepository.findOne({
+      where: { user: { id: user.id }, quest: { id: questId } },
+    });
+
+    if (!questProgress) {
+      throw new NotFoundException('Прогрес квесту не знайдено');
+    }
+    console.log(questProgress);
+
+    await this.questProgressRepository.delete(questProgress.id);
+    return 'Все видалено успішно';
+  }
+
+  async findAll(
+    category?: CATEGORY_ENUM,
+    level?: QUEST_LEVEL_ENUM,
+  ): Promise<QuestEntity[]> {
+    const where: any = {};
+
+    if (category) {
+      where.category = category;
+    }
+
+    if (level) {
+      where.level = level;
+    }
+    return this.questRepository.find({
+      relations: ['taskList', 'reviews'],
+      where: where,
+    });
+  }
+
+  async getUserCreatedQuest(
+    userId: string,
+    category?: CATEGORY_ENUM,
+    level?: QUEST_LEVEL_ENUM,
+  ): Promise<QuestEntity[]> {
+    const where: any = { ownerId: userId };
+
+    if (category) {
+      where.category = category;
+    }
+
+    if (level) {
+      where.level = level;
+    }
+    return await this.questRepository.find({ where: where });
+  }
+
+  async findOne(id: number): Promise<QuestEntity> {
+    const quest = await this.questRepository.findOne({ where: { id } });
+    if (!quest) {
+      throw new NotFoundException(`Quest with id ${id} not found`);
+    }
+    return quest;
   }
 
   async remove(id: number, user: UserEntity): Promise<string> {

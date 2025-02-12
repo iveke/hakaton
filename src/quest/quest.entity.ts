@@ -54,6 +54,4 @@ export class QuestEntity {
 
   @Column({ type: 'int', nullable: true })
   userCount: number;
-
-  
 }

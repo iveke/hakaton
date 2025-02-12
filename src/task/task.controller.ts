@@ -51,7 +51,7 @@ export class TaskController {
     return this.taskService.getList(questId);
   }
 
-  @Get('/getInfo:id')
+  @Get('/getInfo/:id')
   async findOne(@Param('id') id: number) {
     return this.taskService.getOne(id);
   }

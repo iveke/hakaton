@@ -14,7 +14,9 @@ export class TaskEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => QuestEntity, (quest) => quest.taskList)
+  @ManyToOne(() => QuestEntity, (quest) => quest.taskList, {
+    onDelete: 'CASCADE',
+  })
   quest: QuestEntity;
 
   @OneToMany(() => TaskProgress, (taskProgress) => taskProgress.task)
@@ -40,9 +42,9 @@ export class TaskEntity {
   @Column({ type: 'bool', nullable: true })
   checkAnswer: boolean;
 
-  @Column({ type: 'text', nullable: true })
-  matchingOptions: string;
+  @Column({ type: 'json', nullable: true })
+  matchingOptions: { question: string; answer: string }[];
 
-  @Column({ type: 'text', nullable: true })
-  multipleChoiceOptions: string;
+  @Column({ type: 'json', nullable: true })
+  multipleChoiceOptions: string[];
 }

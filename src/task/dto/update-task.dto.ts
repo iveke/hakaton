@@ -32,9 +32,9 @@ export class UpdateTaskDto {
 
   @IsOptional()
   @IsArray()
-  matchingOptions?: { question: string; answer: string }[]; // Тип - масив об'єктів
+  matchingOptions?: { question: string; answer: string }[];
 
   @IsOptional()
   @IsArray()
-  multipleChoiceOptions?: {  question: string[], asnwer: string[]; };
+  multipleChoiceOptions?: string[];
 }

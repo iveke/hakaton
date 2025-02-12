@@ -91,7 +91,7 @@ export class TaskService {
     }
 
     if (type === TASK_TYPE.OPTION) {
-      task.multipleChoiceOptions = JSON.stringify(multipleChoiceOptions);
+      task.multipleChoiceOptions = multipleChoiceOptions;
     }
     if (type === TASK_TYPE.INPUT) {
       task.inputAnswer = inputAnswer;
@@ -100,7 +100,7 @@ export class TaskService {
       task.checkAnswer = checkAnswer;
     }
     if (type === TASK_TYPE.CONFORMITY) {
-      task.matchingOptions = JSON.stringify(matchingOptions);
+      task.matchingOptions = matchingOptions;
     }
 
     task.quest = quest;
@@ -157,10 +157,30 @@ export class TaskService {
   }
 
   async getOne(id: number) {
-    return await this.taskRepository.findOne({
+    const task = await this.taskRepository.findOne({
       where: { id },
       relations: ['quest'],
     });
+
+    if (!task) {
+      throw new NotFoundException('Завдання не знайдено');
+    }
+
+    if (task.type === TASK_TYPE.CONFORMITY && task.matchingOptions) {
+      const questions = task.matchingOptions.map((option) => option.question);
+      const answers = this.shuffleArray(
+        task.matchingOptions.map((option) => option.answer),
+      );
+
+      return {
+        ...task,
+        conformityData: {
+          questions,
+          answers,
+        },
+      };
+    }
+    return task;
   }
 
   // async checkAnswer(id:number, answer: string){
@@ -192,11 +212,11 @@ export class TaskService {
     const updateData: Partial<TaskEntity> = { ...rest }; // Створюємо частковий об'єкт
 
     if (matchingOptions) {
-      updateData.matchingOptions = JSON.stringify(matchingOptions);
+      updateData.matchingOptions = matchingOptions;
     }
 
     if (multipleChoiceOptions) {
-      updateData.multipleChoiceOptions = JSON.stringify(multipleChoiceOptions);
+      updateData.multipleChoiceOptions = multipleChoiceOptions;
     }
 
     await this.taskRepository.update(id, updateData);
@@ -255,5 +275,12 @@ export class TaskService {
     }
 
     throw new ForbiddenException('Вам не дозволено видаляти завдання');
+  }
+
+  shuffleArray<T>(array: T[]): T[] {
+    return array
+      .map((value) => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value);
   }
 }
