@@ -91,7 +91,7 @@ export class QuestController {
   }
 
   @Delete('/remove/:id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
   remove(@Param('id') id: string, @GetAccount() user: UserEntity) {
     return this.questService.remove(+id, user);
   }

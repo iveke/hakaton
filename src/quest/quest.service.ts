@@ -106,7 +106,6 @@ export class QuestService {
     );
 
     quest.users.push(userQuest);
-    console.log(quest.taskList);
 
     const taskProgressList = quest.taskList.map((task) =>
       this.taskProgressRepository.create({
@@ -196,7 +195,9 @@ export class QuestService {
     }
 
     await this.questRepository.delete(id);
-    await this.uploadService.deleteFileByUrl(quest.posterImage);
+    if (quest.posterImage) {
+      await this.uploadService.deleteFileByUrl(quest.posterImage);
+    }
     return 'Все видалено успішно';
   }
 }
