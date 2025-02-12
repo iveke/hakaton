@@ -69,7 +69,7 @@ export class UserRepository {
   async getInfoUser(user: UserEntity) {
     return await this.repository.findOne({
       where: { id: user.id },
-      relations: ['createdQuest', 'quests', 'quests.quest'],
+      relations: ['createdQuest', 'quests', 'quests.quest', 'reviews',],
     });
   }
 
