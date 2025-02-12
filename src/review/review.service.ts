@@ -11,6 +11,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { QuestEntity } from 'src/quest/quest.entity';
+import { USER_ROLE } from 'src/user/enum/user-role.enum';
 @Injectable()
 export class ReviewService {
   constructor(
@@ -104,22 +105,21 @@ export class ReviewService {
   async remove(id: number, user: UserEntity): Promise<void> {
     const review = await this.findOne(id);
 
-    if (review.user.id !== user.id) {
-      throw new UnauthorizedException(
-        'You are not authorized to delete this review.',
-      );
-    }
+  const isReviewOwner = review.user.id === user.id;
+
+  const isAdmin = user.role === USER_ROLE.ADMIN; 
+
+  const isQuestOwner = review.quest.owner.id === user.id;
+
+  if (!isReviewOwner && !isAdmin && isQuestOwner) {
+    throw new UnauthorizedException(
+      'Ви не маєте прав на видалення цього відгуку.',
+    );
+  }
 
     await this.reviewRepository.remove(review);
 
     await this.updateQuestRating(review.quest);
-  }
-
-  async findByQuest(questId: number): Promise<ReviewEntity[]> {
-    return this.reviewRepository.find({
-      where: { quest: { id: questId } },
-      relations: ['user'],
-    });
   }
 
   private async updateQuestRating(quest: QuestEntity): Promise<void> {

@@ -56,9 +56,4 @@ export class ReviewController {
   remove(@Param('id') id: string, @GetAccount() user: UserEntity) {
     return this.reviewService.remove(+id, user);
   }
-
-  // @Get('/:questId')
-  // findByQuest(@Param('questId') questId: string) {
-  //   return this.reviewService.findByQuest(+questId);
-  // }
 }
