@@ -11,6 +11,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/user/user.entity';
 import { USER_ROLE } from 'src/user/enum/user-role.enum';
 import { UploadService } from 'src/file/upload-file.service';
+import { QUEST_LEVEL_ENUM } from './enum/quest-level.enum';
+import { CATEGORY_ENUM } from './enum/quest-category.enum';
 
 @Injectable()
 export class QuestService {
@@ -38,12 +40,40 @@ export class QuestService {
     return this.questRepository.save(quest);
   }
 
-  async findAll(): Promise<QuestEntity[]> {
-    return this.questRepository.find({ relations: ['taskList', 'reviews'] });
+  async findAll(
+    category?: CATEGORY_ENUM,
+    level?: QUEST_LEVEL_ENUM,
+  ): Promise<QuestEntity[]> {
+    const where: any = {};
+
+    if (category) {
+      where.category = category;
+    }
+
+    if (level) {
+      where.level = level;
+    }
+    return this.questRepository.find({
+      relations: ['taskList', 'reviews'],
+      where: where,
+    });
   }
 
-  async getUserCreatedQuest(userId: string): Promise<QuestEntity[]> {
-    return await this.questRepository.find({ where: { ownerId: userId } });
+  async getUserCreatedQuest(
+    userId: string,
+    category?: CATEGORY_ENUM,
+    level?: QUEST_LEVEL_ENUM,
+  ): Promise<QuestEntity[]> {
+    const where: any = { ownerId: userId }; 
+
+    if (category) {
+      where.category = category;
+    }
+
+    if (level) {
+      where.level = level;
+    }
+    return await this.questRepository.find({ where: where });
   }
 
   async findOne(id: number): Promise<QuestEntity> {
