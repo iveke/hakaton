@@ -49,9 +49,9 @@ export class QuestEntity {
   @Column({ nullable: true })
   posterImage: string;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'numeric', precision: 2, scale: 1, nullable: true })
   rating: number;
-
+  
   @Column({ type: 'int', nullable: true })
   userCount: number;
 }
