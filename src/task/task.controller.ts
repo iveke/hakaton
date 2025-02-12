@@ -1,39 +1,90 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFiles,
+  UseGuards,
+} from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { AuthGuard } from '@nestjs/passport';
+import { AccountGuard } from 'src/user/guard/account.guard';
+import { GetAccount } from './../user/decorator/get-account.decorator';
+import { UserEntity } from 'src/user/user.entity';
+import { UpdateUserTaskDto } from './dto/update-userTask.dto';
+import { Roles } from 'src/user/decorator/role.decorator';
+import { USER_ROLE } from 'src/user/enum/user-role.enum';
 
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
-  @Post()
-  @UseInterceptors(FilesInterceptor('files')) 
+  @Post('/create')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  @UseInterceptors(FilesInterceptor('files'))
   async create(
     @Body() createTaskDto: CreateTaskDto,
-    @UploadedFiles() files: Express.Multer.File[]
+    @UploadedFiles() files: Express.Multer.File[],
+    @GetAccount() user: UserEntity,
   ) {
-    return this.taskService.create(createTaskDto, files);
+    return this.taskService.create(createTaskDto, files, user);
   }
 
-  @Get()
-  findAll() {
-    return this.taskService.findAll();
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  @Post('/join/:userQuestId')
+  async createTaskProgress(
+    @GetAccount() user: UserEntity,
+    @Param('userQuestId') userQuestId: number,
+  ) {
+    return this.taskService.createTaskProgress(userQuestId, user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.taskService.findOne(+id);
+  @Get('/list/:questId')
+  async findByQuest(@Param('questId') questId: number) {
+    return this.taskService.getList(questId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(+id, updateTaskDto);
+  @Get('/getInfo:id')
+  async findOne(@Param('id') id: number) {
+    return this.taskService.getOne(id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.taskService.remove(+id);
+  // @Get('/check/:id')
+  // async checkAnswer(@Param('id') id: number) {
+  //   return this.taskService.checkAnswer(id);
+  // }
+
+  @Patch('/update/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async update(
+    @Param('id') id: number,
+    @Body() updateTaskDto: UpdateTaskDto,
+    @GetAccount() user: UserEntity,
+  ) {
+    return this.taskService.update(id, updateTaskDto, user);
+  }
+
+  @Patch('/update/user-task/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async updateUserTask(
+    @Param('id') id: number,
+    @Body() updateTaskDto: UpdateUserTaskDto,
+    @GetAccount() user: UserEntity,
+  ) {
+    return this.taskService.updateUserTask(id, updateTaskDto, user);
+  }
+
+  @Delete('/remove/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  @Roles(USER_ROLE.ADMIN, USER_ROLE.USER)
+  async remove(@Param('id') id: number, @GetAccount() user: UserEntity) {
+    return this.taskService.remove(id, user);
   }
 }

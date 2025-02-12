@@ -1,34 +1,70 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { QuestService } from './quest.service';
 import { CreateQuestDto } from './dto/create-quest.dto';
 import { UpdateQuestDto } from './dto/update-quest.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { AccountGuard } from 'src/user/guard/account.guard';
+import { GetAccount } from 'src/user/decorator/get-account.decorator';
+import { UserEntity } from 'src/user/user.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('quest')
 export class QuestController {
   constructor(private readonly questService: QuestService) {}
 
-  @Post()
-  create(@Body() createQuestDto: CreateQuestDto) {
-    return this.questService.create(createQuestDto);
+  @Post('/create')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  create(
+    @Body() createQuestDto: CreateQuestDto,
+    @UploadedFile() file: Express.Multer.File,
+    @GetAccount() user: UserEntity,
+  ) {
+    return this.questService.create(createQuestDto, user.id, file);
   }
 
-  @Get()
+  @Get('/list')
   findAll() {
     return this.questService.findAll();
   }
 
-  @Get(':id')
+  @Get('/created-list')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  findUserQuest(@GetAccount() user: UserEntity) {
+    return this.questService.getUserCreatedQuest(user.id);
+  }
+
+  @Get('/getInfo:id')
   findOne(@Param('id') id: string) {
     return this.questService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuestDto: UpdateQuestDto) {
-    return this.questService.update(+id, updateQuestDto);
+  @Patch('/update/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  update(
+    @Param('id') id: string,
+    @Body() updateQuestDto: UpdateQuestDto,
+    @UploadedFile() file: Express.Multer.File,
+    @GetAccount() user: UserEntity,
+  ) {
+    return this.questService.update(+id, updateQuestDto, user, file);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.questService.remove(+id);
+  @Delete('/remove/:id')
+  @UseGuards(AuthGuard('jwt'))
+  remove(@Param('id') id: string, @GetAccount() user: UserEntity) {
+    return this.questService.remove(+id, user);
   }
 }

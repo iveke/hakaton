@@ -6,10 +6,18 @@ import { TaskEntity } from './task.entity';
 import { TaskProgress } from './task-progress.entity';
 import { QuestEntity } from 'src/quest/quest.entity';
 import { UploadModule } from 'src/file/upload-file.module';
+import { QuestProgress } from 'src/quest/quest-progress.entity';
+import { UserEntity } from 'src/user/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TaskEntity, TaskProgress, QuestEntity]),
+    TypeOrmModule.forFeature([
+      TaskEntity,
+      TaskProgress,
+      QuestEntity,
+      QuestProgress,
+      UserEntity,
+    ]),
     UploadModule,
   ],
   controllers: [TaskController],

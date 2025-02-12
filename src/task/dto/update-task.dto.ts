@@ -1,4 +1,40 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateTaskDto } from './create-task.dto';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { TASK_TYPE } from '../enum/task-type.enum';
 
-export class UpdateTaskDto extends PartialType(CreateTaskDto) {}
+export class UpdateTaskDto {
+  @IsOptional()
+  @IsString()
+  condition: string;
+
+  @IsOptional()
+  picture?: string;
+
+  @IsOptional()
+  video?: string;
+
+  @IsOptional()
+  @IsEnum(TASK_TYPE)
+  type: TASK_TYPE;
+
+  @IsOptional()
+  @IsString()
+  inputAnswer: string;
+
+  @IsOptional()
+  @IsBoolean()
+  checkAnswer: boolean;
+
+  @IsOptional()
+  @IsArray()
+  matchingOptions?: { question: string; answer: string }[]; // Тип - масив об'єктів
+
+  @IsOptional()
+  @IsArray()
+  multipleChoiceOptions?: {  question: string[], asnwer: string[]; };
+}

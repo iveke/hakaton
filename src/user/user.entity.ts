@@ -3,6 +3,7 @@ import { USER_ROLE } from './enum/user-role.enum';
 import * as argon2 from 'argon2';
 import { QuestProgress } from 'src/quest/quest-progress.entity';
 import { ReviewEntity } from 'src/review/review.entity';
+import { QuestEntity } from 'src/quest/quest.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -11,6 +12,9 @@ export class UserEntity {
 
   @OneToMany(() => QuestProgress, (userQuest) => userQuest.user)
   quests: QuestProgress[];
+
+  @OneToMany(() => QuestEntity, (quest) => quest.owner)
+  createdQuest: QuestEntity[];
 
   @OneToMany(() => ReviewEntity, (review) => review.user, { cascade: true })
   reviews: ReviewEntity[];

@@ -1,14 +1,20 @@
 import { TASK_TYPE } from './enum/task-type.enum';
 import { TaskProgress } from './task-progress.entity';
 import { QuestEntity } from 'src/quest/quest.entity';
-import { PrimaryGeneratedColumn, Entity, ManyToOne, OneToMany, Column } from 'typeorm';
+import {
+  PrimaryGeneratedColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  Column,
+} from 'typeorm';
 
 @Entity('task')
 export class TaskEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(()=>QuestEntity, (quest)=> quest.taskList)
+  @ManyToOne(() => QuestEntity, (quest) => quest.taskList)
   quest: QuestEntity;
 
   @OneToMany(() => TaskProgress, (taskProgress) => taskProgress.task)
@@ -30,4 +36,16 @@ export class TaskEntity {
     default: TASK_TYPE.INPUT,
   })
   type: TASK_TYPE;
+
+  @Column({ type: 'text', nullable: true })
+  inputAnswer: string;
+
+  @Column({ type: 'bool', nullable: true })
+  checkAnswer: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  matchingOptions: string;
+
+  @Column({ type: 'text', nullable: true })
+  multipleChoiceOptions: string;
 }

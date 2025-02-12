@@ -22,8 +22,7 @@ export class UserRepository {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const { email, firstName, lastName, imageURL, clerkId } =
-      createUserDto;
+    const { email, firstName, lastName, imageURL, clerkId } = createUserDto;
 
     const isUserExist = await this.repository.findOne({
       where: { email: email },
@@ -45,10 +44,10 @@ export class UserRepository {
     if (clerkId) {
       user.clerkId = clerkId;
     }
-    if(lastName){
+    if (lastName) {
       user.lastName = lastName;
     }
-    if(imageURL){
+    if (imageURL) {
       user.imageURL = imageURL;
     }
     try {
@@ -63,6 +62,17 @@ export class UserRepository {
     }
   }
 
+  async getAllUserList() {
+    return await this.repository.find();
+  }
+
+  async getInfoUser(user: UserEntity) {
+    return await this.repository.findOne({
+      where: { id: user.id },
+      relations: ['createdQuest', 'quests', 'quests.quest'],
+    });
+  }
+
   async updateUser(
     userID: string,
     updateUserDto: UpdateUserDto,
@@ -74,7 +84,7 @@ export class UserRepository {
 
     const { phone, name } = updateUserDto;
 
-console.log(phone, name)
+    console.log(phone, name);
 
     await this.repository.save(user);
 

@@ -3,17 +3,21 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { QuestProgress } from 'src/quest/quest-progress.entity';
 import { TaskEntity } from './task.entity';
 
-@Entity('task')
+@Entity('task_progress')
 export class TaskProgress {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(()=>QuestProgress, (userQuest) => userQuest.userTaskList)
+  @ManyToOne(() => QuestProgress, (userQuest) => userQuest.userTaskList, {
+    onDelete: 'CASCADE',
+  })
   userQuest: QuestProgress;
 
-  @ManyToOne(()=>TaskEntity, (task)=> task.userTaskList)
+  @ManyToOne(() => TaskEntity, (task) => task.userTaskList, {
+    onDelete: 'CASCADE',
+  })
   task: TaskEntity;
 
-  @Column({ nullable: false, default: false, type: "bool" })
+  @Column({ nullable: false, default: false, type: 'bool' })
   status: boolean;
 }

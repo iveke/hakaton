@@ -22,35 +22,7 @@ export class QuestProgress {
 
   @OneToMany(() => TaskProgress, (userTaskList) => userTaskList.userQuest)
   userTaskList: TaskProgress[];
-  //   @Column({ type: 'text' })
-  //   name: string;
-
-  //   @Column({ type: 'text', nullable: true })
-  //   description: string;
-
-  //   @Column({ nullable: false, type: 'text' })
-  //   owner: string;
-
-  //   @Column({ type: 'enum', enum: CATEGORY_ENUM, nullable: false })
-  //   category: CATEGORY_ENUM;
 
   @Column({ type: 'int', nullable: false, default: 0 })
   countCompletedTask: number;
-
-  //   @Column({
-  //     type: 'enum',
-  //     enum: QUEST_LEVEL_ENUM,
-  //     nullable: false,
-  //     default: QUEST_LEVEL_ENUM.EASY,
-  //   })
-  //   level: QUEST_LEVEL_ENUM;
-
-  //   @Column({ nullable: true })
-  //   posterImage: string;
-
-  //   @Column({ type: 'int', nullable: true })
-  //   rating: number;
-
-  //   @Column({ type: 'int', nullable: true })
-  //   userCount: number;
 }

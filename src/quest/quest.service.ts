@@ -1,26 +1,111 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateQuestDto } from './dto/create-quest.dto';
 import { UpdateQuestDto } from './dto/update-quest.dto';
+import { Repository } from 'typeorm';
+import { QuestEntity } from './quest.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from 'src/user/user.entity';
+import { USER_ROLE } from 'src/user/enum/user-role.enum';
+import { UploadService } from 'src/file/upload-file.service';
 
 @Injectable()
 export class QuestService {
-  create(createQuestDto: CreateQuestDto) {
-    return 'This action adds a new quest';
+  constructor(
+    @InjectRepository(QuestEntity)
+    private readonly questRepository: Repository<QuestEntity>,
+    private readonly uploadService: UploadService,
+  ) {}
+
+  async create(
+    createQuestDto: CreateQuestDto,
+    userId: string,
+    file?: Express.Multer.File,
+  ): Promise<QuestEntity> {
+    let fileUrl = null;
+    if (file) {
+      fileUrl = await this.uploadService.uploadFile(file);
+    }
+    const quest = await this.questRepository.create({
+      ...createQuestDto,
+      ownerId: userId,
+      posterImage: fileUrl,
+    });
+
+    return this.questRepository.save(quest);
   }
 
-  findAll() {
-    return `This action returns all quest`;
+  async findAll(): Promise<QuestEntity[]> {
+    return this.questRepository.find({ relations: ['taskList', 'reviews'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} quest`;
+  async getUserCreatedQuest(userId: string): Promise<QuestEntity[]> {
+    return await this.questRepository.find({ where: { ownerId: userId } });
   }
 
-  update(id: number, updateQuestDto: UpdateQuestDto) {
-    return `This action updates a #${id} quest`;
+  async findOne(id: number): Promise<QuestEntity> {
+    const quest = await this.questRepository.findOne({ where: { id } });
+    if (!quest) {
+      throw new NotFoundException(`Quest with id ${id} not found`);
+    }
+    return quest;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} quest`;
+  async update(
+    id: number,
+    updateQuestDto: UpdateQuestDto,
+    user: UserEntity,
+    file: Express.Multer.File,
+  ): Promise<QuestEntity> {
+    const quest = await this.findOne(id);
+    const { fileDelete, ...updateData } = updateQuestDto;
+    if (!quest) {
+      throw new NotFoundException(`Quest with id ${id} not found`);
+    }
+
+    const isAdmin = user.role === USER_ROLE.ADMIN;
+    const isOwner = quest.ownerId === user.id;
+
+    if (!isAdmin && !isOwner) {
+      throw new ForbiddenException('Ви не маєте права редагувати цей квест');
+    }
+
+    if (fileDelete) {
+      await this.uploadService.deleteFileByUrl(quest.posterImage);
+      quest.posterImage = null;
+    }
+
+    let fileUrl = null;
+    if (file) {
+      fileUrl = await this.uploadService.uploadFile(file);
+    }
+
+    await this.questRepository.update(id, {
+      ...updateData,
+      posterImage: fileUrl ?? undefined,
+    });
+    return this.findOne(id);
+  }
+
+  async remove(id: number, user: UserEntity): Promise<string> {
+    const quest = await this.findOne(id);
+
+    if (!quest) {
+      throw new NotFoundException(`Quest with id ${id} not found`);
+    }
+
+    const isAdmin = user.role === USER_ROLE.ADMIN;
+    const isOwner = quest.ownerId === user.id;
+
+    if (!isAdmin && !isOwner) {
+      throw new ForbiddenException('Ви не маєте права видаляти цей квест');
+    }
+
+    await this.questRepository.delete(id);
+    await this.uploadService.deleteFileByUrl(quest.posterImage);
+    return 'Все видалено успішно';
   }
 }
