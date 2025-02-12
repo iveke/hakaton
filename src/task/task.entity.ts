@@ -24,10 +24,7 @@ export class TaskEntity {
   condition: string;
 
   @Column({ type: 'text', nullable: true })
-  picture: string;
-
-  @Column({ type: 'text', nullable: true })
-  video: string;
+  file: string;
 
   @Column({
     type: 'enum',

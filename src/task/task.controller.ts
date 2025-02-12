@@ -7,13 +7,13 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFiles,
   UseGuards,
+  UploadedFile,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { AccountGuard } from 'src/user/guard/account.guard';
 import { GetAccount } from './../user/decorator/get-account.decorator';
@@ -28,13 +28,13 @@ export class TaskController {
 
   @Post('/create')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(FileInterceptor('files'))
   async create(
     @Body() createTaskDto: CreateTaskDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFile() file: Express.Multer.File,
     @GetAccount() user: UserEntity,
   ) {
-    return this.taskService.create(createTaskDto, files, user);
+    return this.taskService.create(createTaskDto, file, user);
   }
 
   @UseGuards(AuthGuard('jwt'), AccountGuard)

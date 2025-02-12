@@ -4,10 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  DeleteObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 // import { UserEntity } from './user.entity';
 
@@ -28,7 +25,7 @@ export class UploadService {
 
   async uploadFile(
     file: Express.Multer.File,
-  ): Promise<{ url: string; key: string }> {
+  ) {
     try {
       const fileKey = `${uuidv4()}-${file.originalname}`;
 
@@ -46,10 +43,7 @@ export class UploadService {
 
       const data = await upload.done();
       Logger.log(`GET RESPONSE FROM AWS: ${data}`);
-      return {
-        url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`,
-        key: fileKey,
-      };
+      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
     } catch (error) {
       Logger.error('Помилка завантаження файлу:', error);
       throw error;

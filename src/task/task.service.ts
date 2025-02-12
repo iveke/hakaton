@@ -32,11 +32,11 @@ export class TaskService {
   ) {}
   async create(
     createTaskDto: CreateTaskDto,
-    files: Express.Multer.File[],
+    file: Express.Multer.File,
     user: UserEntity,
   ) {
-    let pictureUrl: string | null = null;
-    let videoUrl: string | null = null;
+    // let pictureUrl: string | null = null;
+    let fileUrl: string | null = null;
 
     const quest = await this.questRepository.findOne({
       where: { id: createTaskDto.questId },
@@ -53,15 +53,16 @@ export class TaskService {
       );
     }
 
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const { url } = await this.uploadService.uploadFile(file);
-        if (file.mimetype.startsWith('image/')) {
-          pictureUrl = url;
-        } else if (file.mimetype.startsWith('video/')) {
-          videoUrl = url;
-        }
-      }
+    if (file) {
+      fileUrl = await this.uploadService.uploadFile(file);
+      // for (const file of files) {
+      //   const url = await this.uploadService.uploadFile(file);
+      //   if (file.mimetype.startsWith('image/')) {
+      //     pictureUrl = url;
+      //   } else if (file.mimetype.startsWith('video/')) {
+      //     videoUrl = url;
+      //   }
+      // }
     }
 
     quest.countTask += 1;
@@ -85,12 +86,8 @@ export class TaskService {
       task.type = type;
     }
 
-    if (pictureUrl) {
-      task.picture = pictureUrl;
-    }
-
-    if (videoUrl) {
-      task.video = videoUrl;
+    if (fileUrl) {
+      task.file = fileUrl;
     }
 
     if (type === TASK_TYPE.OPTION) {
