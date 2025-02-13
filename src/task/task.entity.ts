@@ -46,5 +46,5 @@ export class TaskEntity {
   matchingOptions: { question: string; answer: string }[];
 
   @Column({ type: 'json', nullable: true })
-  multipleChoiceOptions: string[];
+  multipleChoiceOptions: { question: string[]; answer: string[] };
 }

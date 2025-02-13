@@ -33,7 +33,7 @@ export class CreateTaskDto {
 
   @IsOptional()
   @IsArray()
-  multipleChoiceOptions?: string[];
+  multipleChoiceOptions?: { question: string[]; answer: string[] };
 
   @IsOptional()
   @IsString()
