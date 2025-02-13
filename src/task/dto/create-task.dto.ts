@@ -29,11 +29,10 @@ export class CreateTaskDto {
 
   @IsOptional()
   @IsArray()
-  matchingOptions?: { question: string; answer: string }[];
+  matchingOptions?: { question: string, answer: string }[];
 
   @IsOptional()
-  @IsArray()
-  multipleChoiceOptions?: { question: string[]; answer: string[] };
+  multipleChoiceOptions?: { question: string[], answer: string[] };
 
   @IsOptional()
   @IsString()
